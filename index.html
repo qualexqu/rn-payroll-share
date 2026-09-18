@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>薪酬核算自动化系统 · 锐诺 · e43</title>
+<title>薪酬核算自动化系统 · 锐诺 · e44</title>
 <script>
 (function(){
-  var VER='e43';
+  var VER='e44';
   try{
     var u=new URL(location.href);
     if(u.searchParams.get('pr')!==VER){
@@ -1163,7 +1163,23 @@ function unlockPayMonth(){
   refreshView();
   toast('已解锁，可以调整薪资');
 }
+function askArchiveViewPin(){
+  const first = !PAY_PIN_HASH;
+  const p1 = prompt(first ? '请设置薪资归档查看密码（请自行保管）' : '请输入密码查看薪资大表明细');
+  if(p1==null || !String(p1).trim()){ toast('已取消'); return false; }
+  if(first){
+    const p2 = prompt('请再输入一次密码确认');
+    if(p2!==p1){ toast('两次密码不一致'); return false; }
+    PAY_PIN_HASH = pinHash(p1);
+    persistPayStore();
+    toast('查看密码已设置');
+    return true;
+  }
+  if(pinHash(p1)!==PAY_PIN_HASH){ toast('密码不正确'); return false; }
+  return true;
+}
 function openArchiveMonth(m){
+  if(!askArchiveViewPin()) return;
   archiveMonthSel = m;
   archivePane = 'detail';
   archEmpFlt = {};
@@ -1969,7 +1985,7 @@ function renderPayArchive(){
   <div class="card" style="flex:1;min-height:0;display:flex;flex-direction:column">
     <div class="card-head">
       <span class="tt">薪资归档</span>
-      <span class="desc">点月份进入该月薪资大表明细 · 归档后锁定本月制作</span>
+      <span class="desc">点「查看明细」需输入密码 · 归档后锁定本月制作</span>
       ${payLocked() ? `<button class="btn btn-sm btn-danger" onclick="unlockPayMonth()">解锁本月</button>` : `<button class="btn btn-sm btn-primary" onclick="archivePayMonth()">归档本月 ${esc(activeMonth)}</button>`}
       <div class="spacer"></div>
     </div>
